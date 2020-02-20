@@ -8,20 +8,22 @@ class Node:
         self.parent = None
 
     def isLeaf(self):
+        '''returns if node is leaf or not'''
         return not self.left and not self.right
 
 class BST:
     def __init__(self, rootval):
         self.root = Node(rootval)
 
-    def insertRec(self, val, node="init", prev=None, l=False):
+    def insertRec(self, val):
         '''inserts val recursively into BST'''
+        return self.insertRecHelper(val, self.root, None, False)
+
+    def insertRecHelper(self, val, node, prev, l):
         # val is value to be inserted
         # node is current node
         # prev is previous node
         # l is whether the node is to be inserted on left or right
-        if node == "init":
-            node = self.root
         if not node:
             if l:
                 prev.left = Node(val)
@@ -32,78 +34,89 @@ class BST:
             return
 
         if val < node.val:
-            self.insertRec(val, node.left, node, True)
+            self.insertRecHelper(val, node.left, node, True)
         else:
-            self.insertRec(val, node.right, node, False)
+            self.insertRecHelper(val, node.right, node, False)
 
     def deleteRec(self):
         pass
 
-    def findNextRec(self, node, oper=0, orig="init"):
+    def findNextRec(self, node):
         '''returns node with next highest value in BST'''
-        # oper 0 means check right first. if no right, go to oper 2; if right, go to oper 1 with node.right
+        return self.findNextRecHelper(node, 0, node.val)
+
+    def findNextRecHelper(self, node, oper, orig):
+        # oper 0 means check right first. if no right, go to oper 2 with node.parent; if right, go to oper 1 with node.right
         # oper 1 means go node.left until leaf
-        # oper 2 means go to parent until parent > original
-        if orig == "init":
-            orig = node.val
-        if oper == 0 and orig == self.findMaxRec(self.root).val:
+        # oper 2 means go to parent until parent >= original
+        if oper == 0 and orig == self.findMaxRec().val:
             print("there is no higher value")
             return None
         if oper == 0:
             if not node.right:
-                return self.findNextRec(node, 2, orig)
-            return self.findNextRec(node.right, 1, orig)
+                return self.findNextRecHelper(node.parent, 2, orig)
+            return self.findNextRecHelper(node.right, 1, orig)
         if oper == 1:
             if not node.left:
                 return node
-            return self.findNextRec(node.left, 1, orig)
+            return self.findNextRecHelper(node.left, 1, orig)
         if oper == 2:
             if node.val >= orig:
                 return node
-            return self.findNextRec(node.parent, 2, orig)
+            return self.findNextRecHelper(node.parent, 2, orig)
 
-    def findPrevRec(self, node, oper=0, orig="init"):
+    def findPrevRec(self, node):
         '''returns node with next lowest value in BST'''
-        # oper 0 means check left first. if no left, go to oper 2; if left, go to oper 1 with node.left
+        return self.findPrevRecHelper(node, 0, node.val)
+
+    def findPrevRecHelper(self, node, oper, orig):
+        # oper 0 means check left first. if no left, go to oper 2 with node.parent; if left, go to oper 1 with node.left
         # oper 1 means go node.right until leaf 
         # oper 2 means go to parent until parent < original
-        if orig == "init":
-            orig = node.val
-        if oper == 0 and orig == self.findMinRec(self.root).val:
+        if oper == 0 and orig == self.findMinRec().val:
             print("there is no lower value")
             return None
         if oper == 0:
             if not node.left:
-                return self.findPrevRec(node, 2, orig)
-            return self.findPrevRec(node.left, 1, orig)
+                return self.findPrevRecHelper(node.parent, 2, orig)
+            return self.findPrevRecHelper(node.left, 1, orig)
         if oper == 1:
             if not node.right:
                 return node
-            return self.findPrevRec(node.right, 1, orig)
+            return self.findPrevRecHelper(node.right, 1, orig)
         if oper == 2:
             if node.val <= orig:
                 return node
-            return self.findPrevRec(node.parent, 2, orig)
+            return self.findPrevRecHelper(node.parent, 2, orig)
 
-    def findMaxRec(self, node):
-        "returns node with highest value in BST"
+    def findMaxRec(self):
+        '''returns node with highest value in BST'''
+        return self.findMaxRecHelper(self.root)
+    
+    def findMaxRecHelper(self, node):
         if not node.right:
             return node
-        return self.findMaxRec(node.right)
+        return self.findMaxRecHelper(node.right)
 
-    def findMinRec(self, node):
-        "returns node with lowest value in BST"
+    def findMinRec(self):
+        '''returns node with lowest value in BST'''
+        return self.findMinRecHelper(self.root)
+
+    def findMinRecHelper(self, node):
         if not node.left:
             return node
-        return self.findMinRec(node.left)
+        return self.findMinRecHelper(node.left)
 
-    def inOrder(self, node):
-        "prints BST with inorder traversal"
+    def inOrder(self):
+        '''prints BST with inorder traversal'''
+        return self.inOrderHelper(self.root)
+
+    def inOrderHelper(self, node):
         if not node:
             return
-        self.inOrder(node.left)
+        self.inOrderHelper(node.left)
         print(node.val)
-        self.inOrder(node.right)
+        self.inOrderHelper(node.right)
 
 
 bst = BST(10)
@@ -115,7 +128,7 @@ bst.insertRec(12)
 bst.insertRec(6)
 bst.insertRec(7)
 bst.insertRec(2)
-bst.inOrder(bst.root)
+bst.inOrder()
 
 print("next val for", bst.root.left.val, ":", bst.findNextRec(bst.root.left).val)
 print("next val for", bst.root.left.left.val, ":", bst.findNextRec(bst.root.left.left).val)
@@ -124,5 +137,5 @@ print("prev val for", bst.root.left.val, ":", bst.findPrevRec(bst.root.left).val
 print("prev val for", bst.root.left.left.val, ":", bst.findPrevRec(bst.root.left.left).val)
 print("prev val for", bst.root.left.right.val, ":", bst.findPrevRec(bst.root.left.right).val)
 
-print("max value:", bst.findMaxRec(bst.root).val)
-print("min value:", bst.findMinRec(bst.root).val)
+print("max value:", bst.findMaxRec().val)
+print("min value:", bst.findMinRec().val)
