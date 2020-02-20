@@ -25,21 +25,53 @@ class BST:
         # prev is previous node
         # l is whether the node is to be inserted on left or right
         if not node:
+            if self.root == None:
+                self.root = Node(val)
+                return
             if l:
                 prev.left = Node(val)
                 prev.left.parent = prev
-            else:
-                prev.right = Node(val)
-                prev.right.parent = prev
-            return
+                return prev.left
+            prev.right = Node(val)
+            prev.right.parent = prev
+            return prev.right
 
         if val < node.val:
-            self.insertRecHelper(val, node.left, node, True)
-        else:
-            self.insertRecHelper(val, node.right, node, False)
+            return self.insertRecHelper(val, node.left, node, True)
+        return self.insertRecHelper(val, node.right, node, False)
 
-    def deleteRec(self):
-        pass
+    def deleteRec(self, val):
+        '''deletes node with given value in BST'''
+        return self.deleteRecHelper(val, self.root, False)
+    
+    def deleteRecHelper(self, val, node, l):
+        # val is value to be inserted
+        # node is current node
+        # l is whether the current node is a left or right node
+        if not node:
+            return node
+        if val < node.val:
+            return self.deleteRecHelper(val, node.left, True)
+        elif val > node.val:
+            return self.deleteRecHelper(val, node.right, False)
+        else:
+            if node.isLeaf():
+                if not node.parent:
+                    self.root = None
+                elif l:
+                    node.parent.left = None
+                else:
+                    node.parent.right = None
+            elif node.left and not node.right:
+                node.val = node.left.val
+                node.left = None
+            elif node.right and not node.left:
+                node.val = node.right.val
+                node.right = None
+            else:
+                suc = self.findNextRec(node)
+                node.val = suc.val
+                self.deleteRecHelper(suc.val, node.right, False)
 
     def findNextRec(self, node):
         '''returns node with next highest value in BST'''
@@ -109,6 +141,7 @@ class BST:
 
     def inOrder(self):
         '''prints BST with inorder traversal'''
+        print("INORDER TRAVERSAL")
         return self.inOrderHelper(self.root)
 
     def inOrderHelper(self, node):
@@ -123,19 +156,45 @@ bst = BST(10)
 bst.insertRec(5)
 bst.insertRec(8)
 bst.insertRec(3)
-bst.insertRec(4)
+four = bst.insertRec(4)
 bst.insertRec(12)
 bst.insertRec(6)
 bst.insertRec(7)
 bst.insertRec(2)
+bst.deleteRec(12)
 bst.inOrder()
 
 print("next val for", bst.root.left.val, ":", bst.findNextRec(bst.root.left).val)
 print("next val for", bst.root.left.left.val, ":", bst.findNextRec(bst.root.left.left).val)
 print("next val for", bst.root.left.left.left.val, ":", bst.findNextRec(bst.root.left.left.left).val)
+print("next val for", four.val, ":", bst.findNextRec(four).val)
 print("prev val for", bst.root.left.val, ":", bst.findPrevRec(bst.root.left).val)
 print("prev val for", bst.root.left.left.val, ":", bst.findPrevRec(bst.root.left.left).val)
 print("prev val for", bst.root.left.right.val, ":", bst.findPrevRec(bst.root.left.right).val)
+print("prev val for", four.val, ":", bst.findPrevRec(four).val)
 
 print("max value:", bst.findMaxRec().val)
 print("min value:", bst.findMinRec().val)
+
+bst.deleteRec(3)
+bst.deleteRec(7)
+bst.deleteRec(8)
+bst.deleteRec(5)
+bst.deleteRec(2)
+bst.deleteRec(6)
+bst.deleteRec(4)
+bst.deleteRec(10)
+
+bst.insertRec(69)
+bst.inOrder()
+print("max value:", bst.findMaxRec().val)
+print("min value:", bst.findMinRec().val)
+
+'''
+bst2 = BST(3)
+bst2.insertRec(5)
+bst2.insertRec(1)
+bst2.insertRec(2)
+bst2.deleteRec(3)
+bst2.inOrder()
+'''
