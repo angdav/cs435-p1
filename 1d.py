@@ -61,22 +61,14 @@ class BST:
             if node == self.root:
                 self.root = node.left
                 self.root.parent = None
-            elif node.parent.left == node:
-                node.parent.left = node.left
-                node.parent.left.parent = node.parent
-            elif node.parent.right == node:
-                node.parent.right = node.left
-                node.parent.right.parent = node.parent
+            else:
+                self.jumpPointLeft(node)
         elif node.right and not node.left:
             if node == self.root:
                 self.root = node.right
                 self.root.parent = None
-            elif node.parent.left == node:
-                node.parent.left = node.right
-                node.parent.left.parent = node.parent
-            elif node.parent.right == node:
-                node.parent.right = node.right
-                node.parent.right.parent = node.parent
+            else:
+                self.jumpPointRight(node)
         else:
             suc = self.findNextIter(node)
             node.val = suc.val
@@ -85,7 +77,6 @@ class BST:
                     suc.parent.right = None
                 else:
                     suc.parent.left = None
-                return
             elif suc.left and suc.right:
                 suc.parent.right = suc.right
                 suc.parent.right.parent = suc.parent
@@ -96,20 +87,26 @@ class BST:
                 newnode.left = store
                 store.parent = newnode
             elif suc.left:
-                if suc.parent.left == suc:
-                    suc.parent.left = suc.left
-                    suc.parent.left.parent = suc.parent
-                elif suc.parent.right == suc:
-                    suc.parent.right = suc.left
-                    suc.parent.right.parent = suc.parent
+                self.jumpPointLeft(suc)
             elif suc.right:
-                if suc.parent.left == suc:
-                    suc.parent.left = suc.right
-                    suc.parent.left.parent = suc.parent
-                elif suc.parent.right == suc:
-                    suc.parent.right = suc.right
-                    suc.parent.right.parent = suc.parent
+                self.jumpPointRight(suc)
         
+    def jumpPointLeft(self, node):
+        if node.parent.left == node:
+            node.parent.left = node.left
+            node.parent.left.parent = node.parent
+        elif node.parent.right == node:
+            node.parent.right = node.left
+            node.parent.right.parent = node.parent
+    
+    def jumpPointRight(self, node):
+        if node.parent.left == node:
+            node.parent.left = node.right
+            node.parent.left.parent = node.parent
+        elif node.parent.right == node:
+            node.parent.right = node.right
+            node.parent.right.parent = node.parent
+
 
     def findNextIter(self, node):
         '''returns node with next highest value in BST'''
@@ -197,19 +194,12 @@ print("max value:", bst.findMaxIter().val)
 print("min value:", bst.findMinIter().val)
 
 bst.deleteIter(7)
-bst.inOrder()
 bst.deleteIter(2)
-bst.inOrder()
 bst.deleteIter(5)
-bst.inOrder()
 bst.deleteIter(6)
-bst.inOrder()
 bst.deleteIter(3)
-bst.inOrder()
 bst.deleteIter(4)
-bst.inOrder()
 bst.deleteIter(10)
-bst.inOrder()
 bst.deleteIter(8)
 
 bst.insertIter(69)
