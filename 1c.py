@@ -16,7 +16,7 @@ class BST:
         self.root = Node(rootval)
 
     def insertRec(self, val):
-        '''inserts val recursively into BST'''
+        '''inserts val recursively into BST, returns inserted node'''
         return self.insertRecHelper(val, self.root, None, False)
 
     def insertRecHelper(self, val, node, prev, l):
@@ -63,11 +63,25 @@ class BST:
                 else:
                     node.parent.right = None
             elif node.left and not node.right:
-                node.val = node.left.val
-                node.left = None
+                if node == self.root:
+                    self.root = node.left
+                    self.root.parent = None
+                elif node.parent.left == node:
+                    node.parent.left = node.left
+                    node.parent.left.parent = node.parent
+                elif node.parent.right == node:
+                    node.parent.right = node.left
+                    node.parent.right.parent = node.parent
             elif node.right and not node.left:
-                node.val = node.right.val
-                node.right = None
+                if node == self.root:
+                    self.root = node.right
+                    self.root.parent = None
+                elif node.parent.left == node:
+                    node.parent.left = node.right
+                    node.parent.left.parent = node.parent
+                elif node.parent.right == node:
+                    node.parent.right = node.right
+                    node.parent.right.parent = node.parent
             else:
                 suc = self.findNextRec(node)
                 node.val = suc.val
@@ -176,25 +190,23 @@ print("prev val for", four.val, ":", bst.findPrevRec(four).val)
 print("max value:", bst.findMaxRec().val)
 print("min value:", bst.findMinRec().val)
 
-bst.deleteRec(3)
 bst.deleteRec(7)
-bst.deleteRec(8)
-bst.deleteRec(5)
+bst.inOrder()
 bst.deleteRec(2)
+bst.inOrder()
+bst.deleteRec(5)
+bst.inOrder()
 bst.deleteRec(6)
+bst.inOrder()
+bst.deleteRec(3)
+bst.inOrder()
 bst.deleteRec(4)
+bst.inOrder()
 bst.deleteRec(10)
+bst.inOrder()
+bst.deleteRec(8)
 
 bst.insertRec(69)
 bst.inOrder()
 print("max value:", bst.findMaxRec().val)
 print("min value:", bst.findMinRec().val)
-
-'''
-bst2 = BST(3)
-bst2.insertRec(5)
-bst2.insertRec(1)
-bst2.insertRec(2)
-bst2.deleteRec(3)
-bst2.inOrder()
-'''
