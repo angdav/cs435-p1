@@ -4,6 +4,7 @@ class Node:
         self.left = None
         self.right = None
         self.parent = None
+        self.height = 1
 
     def isLeaf(self):
         '''returns if node is leaf or not'''

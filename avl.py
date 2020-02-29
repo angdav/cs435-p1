@@ -1,20 +1,12 @@
-# Problem 4 Part C (Implement Iterative AVL Functions)
-
-class Node:
-    def __init__(self, val):
-        self.val = val
-        self.left = None
-        self.right = None
-        self.parent = None
-        self.height = 1
-
-    def isLeaf(self):
-        '''returns if node is leaf or not'''
-        return not self.left and not self.right
+import node as nd
 
 class AVL:
     def __init__(self, rootval):
-        self.root = Node(rootval)
+        if rootval == None:
+            self.root = None
+        else:
+            self.root = nd.Node(rootval)
+        self.traversecount = 0
 
     def getbf(self, node):
         '''returns the balance factor of the given node'''
@@ -59,7 +51,7 @@ class AVL:
         if node.left.right:
             store = node.left.right
             store2 = node.right
-            newroot.right = Node(node.val)
+            newroot.right = nd.Node(node.val)
             newroot.right.parent = node.left
             if parent:
                 if parent.left == node:
@@ -80,7 +72,7 @@ class AVL:
             node.right = None
         else:
             store2 = node.right
-            newroot.right = Node(node.val)
+            newroot.right = nd.Node(node.val)
             newroot.right.parent = node.left
             if parent:
                 if parent.right == node:
@@ -119,7 +111,7 @@ class AVL:
             newroot.parent = node
             lnode.parent = None
             lnode.right = None
-            newroot.left = Node(lnode.val)
+            newroot.left = nd.Node(lnode.val)
             newroot.left.parent = newroot
             newroot.left.left = store2
             if store2:
@@ -136,7 +128,7 @@ class AVL:
         if node.right.left:
             store = node.right.left
             store2 = node.left
-            newroot.left = Node(node.val)
+            newroot.left = nd.Node(node.val)
             newroot.left.parent = node.right
             if parent:
                 if parent.left == node:
@@ -157,7 +149,7 @@ class AVL:
             node.left = None
         else:
             store2 = node.left
-            newroot.left = Node(node.val)
+            newroot.left = nd.Node(node.val)
             newroot.left.parent = node.right
             if parent:
                 if parent.right == node:
@@ -196,7 +188,7 @@ class AVL:
             newroot.parent = node
             lnode.parent = None
             lnode.left = None
-            newroot.right = Node(lnode.val)
+            newroot.right = nd.Node(lnode.val)
             newroot.right.parent = newroot
             newroot.right.right = store2
             if store2:
@@ -209,8 +201,9 @@ class AVL:
     def insertIter(self, val):
         '''inserts val iteratively into AVL, returns inserted node'''
         node = self.root
+        levelcount = 1
         if self.root == None:
-            self.root = Node(val)
+            self.root = nd.Node(val)
             return self.root
 
         while True:
@@ -218,16 +211,18 @@ class AVL:
             if val < node.val:
                 if node.left:
                     node = node.left
+                    self.traversecount += 1
                     continue
-                node.left = Node(val)
+                node.left = nd.Node(val)
                 node.left.parent = prev
                 self.setHeight(node)
                 self.balance(node)
                 return node.left
             if node.right:
                 node = node.right
+                self.traversecount += 1
                 continue
-            node.right = Node(val)
+            node.right = nd.Node(val)
             node.right.parent = prev
             self.setHeight(node)
             self.balance(node)
