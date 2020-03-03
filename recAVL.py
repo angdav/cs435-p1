@@ -1,4 +1,4 @@
-# Problem 4 Part C (Implement Iterative AVL Functions)
+# Extra Credit (Implement Recursive AVL Functions)
 
 class Node:
     def __init__(self, val):
@@ -6,44 +6,42 @@ class Node:
         self.left = None
         self.right = None
         self.parent = None
-        self.height = 1
 
     def isLeaf(self):
         '''returns if node is leaf or not'''
         return not self.left and not self.right
 
-class AVL:
+class recAVL:
     def __init__(self, rootval):
         if rootval == None:
             self.root = None
         else:
             self.root = nd.Node(rootval)
 
+    def getHeight(self, node):
+        '''returns the height of the tree starting at the given node'''
+        if node is None:
+            return 0
+        
+        lHeight = self.getHeight(node.left)
+        rHeight = self.getHeight(node.right)
+
+        if (lHeight > rHeight):
+            return lHeight + 1
+        return rHeight + 1
+
     def getbf(self, node):
         '''returns the balance factor of the given node'''
         if node.right and not node.left:
-            return 0 - node.right.height
+            return 0 - self.getHeight(node.right)
         elif not node.right and node.left:
-            return node.left.height
+            return self.getHeight(node.left)
         elif not node.right and not node.right:
             return 0
-        return node.left.height - node.right.height
-
-    def setHeight(self, node):
-        '''sets the proper height of a given node and all its parents'''
-        while node:
-            if not node.left and not node.right:
-                node.height = 1
-            elif node.left and not node.right:
-                node.height = node.left.height + 1
-            elif not node.left and node.right:
-                node.height = node.right.height + 1
-            else:
-                node.height = max(node.left.height, node.right.height) + 1
-            node = node.parent
+        return self.getHeight(node.left) - self.getHeight(node.right)
 
     def balance(self, node):
-        '''balances the AVL tree'''
+        '''balances the recAVL tree'''
         while node:
             if self.getbf(node) > 1 and self.getbf(node.left) > 0: # left left
                 self.ll(node)
@@ -97,7 +95,6 @@ class AVL:
                 store2.parent = newroot.right
             node.left = None
             node.parent = None
-        self.setHeight(newroot.right)
         if newroot:
             newroot.parent = parent
             if not newroot.parent:
@@ -174,7 +171,6 @@ class AVL:
                 store2.parent = newroot.left
             node.right = None
             node.parent = None
-        self.setHeight(newroot.left)
         if newroot:
             newroot.parent = parent
             if not newroot.parent:
@@ -209,173 +205,139 @@ class AVL:
                 store.parent = newroot.right
         self.rr(node)
 
-    def insertIter(self, val):
-        '''inserts val iteratively into AVL, returns inserted node'''
-        node = self.root
-        if self.root == None:
-            self.root = Node(val)
-            return self.root
+    def insertRec(self, val):
+        '''inserts val recursively into recAVL, returns inserted node'''
+        return self.insertRecHelper(val, self.root, None, False)
 
-        while True:
-            prev = node
-            if val < node.val:
-                if node.left:
-                    node = node.left
-                    continue
-                node.left = Node(val)
-                node.left.parent = prev
-                self.setHeight(node)
-                self.balance(node)
-                return node.left
-            if node.right:
-                node = node.right
-                continue
-            node.right = Node(val)
-            node.right.parent = prev
-            self.setHeight(node)
-            self.balance(node)
-            return node.right
+    def insertRecHelper(self, val, node, prev, l):
+        if not node:
+            if self.root == None:
+                self.root = Node(val)
+                return
+            if l:
+                prev.left = Node(val)
+                prev.left.parent = prev
+                self.balance(prev)
+                return prev.left
+            prev.right = Node(val)
+            prev.right.parent = prev
+            self.balance(prev)
+            return prev.right
 
-    def deleteIter(self, val):
-        '''deletes node with given value in AVL'''
-        node = self.root
-        l = False
+        if val < node.val:
+            return self.insertRecHelper(val, node.left, node, True)
+        return self.insertRecHelper(val, node.right, node, False)
 
-        while node.val != val:
-            if val < node.val:
-                node = node.left
-                l = True
-            else:
-                node = node.right
-                l = False
-        if node.isLeaf():
-            if not node.parent:
-                self.root = None
-            elif l:
-                node.parent.left = None
-                self.setHeight(node.parent)
-                self.balance(node.parent)
-            else:
-                node.parent.right = None
-                self.setHeight(node.parent)
-                self.balance(node.parent)
-        elif node.left and not node.right:
-            if node == self.root:
-                self.root = node.left
-                self.root.parent = None
-                self.setHeight(self.root)
-                self.balance(self.root)
-            else:
-                self.jumpPointLeft(node)
-        elif node.right and not node.left:
-            if node == self.root:
-                self.root = node.right
-                self.root.parent = None
-                self.setHeight(self.root)
-                self.balance(self.root)
-            else:
-                self.jumpPointRight(node)
-        else:
-            suc = self.findNextIter(node)
-            node.val = suc.val
-            if suc.isLeaf():
-                if suc.parent.right == suc:
-                    suc.parent.right = None
-                else:
-                    suc.parent.left = None
-                self.setHeight(suc.parent)
-                self.balance(suc.parent)
-            elif suc.left and suc.right:
-                suc.parent.right = suc.right
-                suc.parent.right.parent = suc.parent
-                store = suc.left
-                newnode = suc.parent.right
-                while newnode.left:
-                    newnode = newnode.left
-                newnode.left = store
-                store.parent = newnode
-                self.setHeight(store)
-                self.balance(store)
-            elif suc.left:
-                self.jumpPointLeft(suc)
-            elif suc.right:
-                self.jumpPointRight(suc)
-        
-    def jumpPointLeft(self, node):
-        if node.parent.left == node:
-            node.parent.left = node.left
-            node.parent.left.parent = node.parent
-            self.setHeight(node.parent.left)
-            self.balance(node.parent.left)
-        elif node.parent.right == node:
-            node.parent.right = node.left
-            node.parent.right.parent = node.parent
-            self.setHeight(node.parent.right)
-            self.balance(node.parent.right)
+    def deleteRec(self, val):
+        '''deletes node with given value in recAVL'''
+        return self.deleteRecHelper(val, self.root, False)
     
-    def jumpPointRight(self, node):
-        if node.parent.left == node:
-            node.parent.left = node.right
-            node.parent.left.parent = node.parent
-            self.setHeight(node.parent.left)
-            self.balance(node.parent.left)
-        elif node.parent.right == node:
-            node.parent.right = node.right
-            node.parent.right.parent = node.parent
-            self.setHeight(node.parent.right)
-            self.balance(node.parent.right)
+    def deleteRecHelper(self, val, node, l):
+        if not node:
+            return node
+        if val < node.val:
+            return self.deleteRecHelper(val, node.left, True)
+        elif val > node.val:
+            return self.deleteRecHelper(val, node.right, False)
+        else:
+            if node.isLeaf():
+                if not node.parent:
+                    self.root = None
+                elif l:
+                    node.parent.left = None
+                    self.balance(node.parent)
+                else:
+                    node.parent.right = None
+                    self.balance(node.parent)
+            elif node.left and not node.right:
+                if node == self.root:
+                    self.root = node.left
+                    self.root.parent = None
+                elif node.parent.left == node:
+                    node.parent.left = node.left
+                    node.parent.left.parent = node.parent
+                elif node.parent.right == node:
+                    node.parent.right = node.left
+                    node.parent.right.parent = node.parent
+                self.balance(node.parent)
+            elif node.right and not node.left:
+                if node == self.root:
+                    self.root = node.right
+                    self.root.parent = None
+                elif node.parent.left == node:
+                    node.parent.left = node.right
+                    node.parent.left.parent = node.parent
+                elif node.parent.right == node:
+                    node.parent.right = node.right
+                    node.parent.right.parent = node.parent
+                self.balance(node.parent)
+            else:
+                suc = self.findNextRec(node)
+                node.val = suc.val
+                self.deleteRecHelper(suc.val, node.right, False)
 
+    def findNextRec(self, node):
+        '''returns node with next highest value in recAVL'''
+        return self.findNextRecHelper(node, 0, node.val)
 
-    def findNextIter(self, node):
-        '''returns node with next highest value in AVL'''
-        val = node.val
-        if val == self.findMaxIter().val:
+    def findNextRecHelper(self, node, oper, orig):
+        if oper == 0 and orig == self.findMaxRec().val:
             print("there is no higher value")
             return None
-        if not node.right:
-            node = node.parent
-            while node and node.val < val:
-                node = node.parent
-            return node
-        else:
-            node = node.right
-            while node.left:
-                node = node.left
-            return node
+        if oper == 0:
+            if not node.right:
+                return self.findNextRecHelper(node.parent, 2, orig)
+            return self.findNextRecHelper(node.right, 1, orig)
+        if oper == 1:
+            if not node.left:
+                return node
+            return self.findNextRecHelper(node.left, 1, orig)
+        if oper == 2:
+            if node.val >= orig:
+                return node
+            return self.findNextRecHelper(node.parent, 2, orig)
 
-    def findPrevIter(self, node):
-        '''returns node with next lowest value in AVL'''
-        val = node.val
-        if val == self.findMinIter().val:
+    def findPrevRec(self, node):
+        '''returns node with next lowest value in recAVL'''
+        return self.findPrevRecHelper(node, 0, node.val)
+
+    def findPrevRecHelper(self, node, oper, orig):
+        if oper == 0 and orig == self.findMinRec().val:
             print("there is no lower value")
             return None
+        if oper == 0:
+            if not node.left:
+                return self.findPrevRecHelper(node.parent, 2, orig)
+            return self.findPrevRecHelper(node.left, 1, orig)
+        if oper == 1:
+            if not node.right:
+                return node
+            return self.findPrevRecHelper(node.right, 1, orig)
+        if oper == 2:
+            if node.val <= orig:
+                return node
+            return self.findPrevRecHelper(node.parent, 2, orig)
+
+    def findMaxRec(self):
+        '''returns node with highest value in recAVL'''
+        return self.findMaxRecHelper(self.root)
+    
+    def findMaxRecHelper(self, node):
+        if not node.right:
+            return node
+        return self.findMaxRecHelper(node.right)
+
+    def findMinRec(self):
+        '''returns node with lowest value in recAVL'''
+        return self.findMinRecHelper(self.root)
+
+    def findMinRecHelper(self, node):
         if not node.left:
-            node = node.parent
-            while node and node.val >= val:
-                node = node.parent
             return node
-        else:
-            node = node.left
-            while node.right:
-                node = node.right
-            return node
-
-    def findMaxIter(self):
-        '''returns node with highest value in AVL'''
-        node = self.root
-        while node.right:
-            node = node.right
-        return node
-
-    def findMinIter(self):
-        '''returns node with lowest value in AVL'''
-        node = self.root
-        while node.left:
-            node = node.left
-        return node
+        return self.findMinRecHelper(node.left)
 
     def inOrder(self):
-        '''prints AVL with inorder traversal'''
+        '''prints recAVL with inorder traversal'''
         print("INORDER TRAVERSAL")
         return self.inOrderHelper(self.root)
 
@@ -383,5 +345,5 @@ class AVL:
         if not node:
             return
         self.inOrderHelper(node.left)
-        print(node.val, node.height)
+        print(node.val)
         self.inOrderHelper(node.right)

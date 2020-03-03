@@ -6,7 +6,7 @@ def getRandomArray(n):
     retarr = []
     while len(retarr) < n:
         r = random.randint(0,n*10)
-        if n not in tempset:
+        if r not in tempset:
             tempset.add(r)
             retarr.append(r)
     return retarr
