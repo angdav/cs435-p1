@@ -17,7 +17,7 @@ class AVL:
         if rootval == None:
             self.root = None
         else:
-            self.root = nd.Node(rootval)
+            self.root = Node(rootval)
 
     def getbf(self, node):
         '''returns the balance factor of the given node'''
